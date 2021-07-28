@@ -99,7 +99,7 @@ def file_extension(path):
     return os.path.splitext(path)[1]
 
 def update_sst_file_count_metric(dir_abs_path, current_sst_abspaths):
-    setAbsPathGaugeValue("rocksdb:sst_file_count", dir_abs_path, len(current_sst_abspaths))
+    setAbsPathGaugeValue("rocksdb_sst_file_count", dir_abs_path, len(current_sst_abspaths))
 
 def update_store_size_metric(dir_abs_path, current_sst_abspaths):
     store_size = 0
@@ -108,7 +108,7 @@ def update_store_size_metric(dir_abs_path, current_sst_abspaths):
             store_size += os.stat(path).st_size
         except OSError:
             continue
-    setAbsPathGaugeValue("rocksdb:store_size", dir_abs_path, store_size)
+    setAbsPathGaugeValue("rocksdb_store_size", dir_abs_path, store_size)
 
 def update_bytes_written_metric(dir_abs_path, sst_abspath):
     try:
@@ -116,15 +116,15 @@ def update_bytes_written_metric(dir_abs_path, sst_abspath):
     except OSError:
         return
     if sst_abspath not in SST_ABSPATH_TO_SIZE_IN_BYTES:
-        incrementAbsPathGaugeValue("rocksdb:sst_file_bytes_written", dir_abs_path, sst_file_size)
+        incrementAbsPathGaugeValue("rocksdb_sst_file_bytes_written", dir_abs_path, sst_file_size)
     else:
         previous_sst_file_size = SST_ABSPATH_TO_SIZE_IN_BYTES[sst_abspath]
-        incrementAbsPathGaugeValue("rocksdb:sst_file_bytes_written", dir_abs_path, sst_file_size - previous_sst_file_size)
+        incrementAbsPathGaugeValue("rocksdb_sst_file_bytes_written", dir_abs_path, sst_file_size - previous_sst_file_size)
     SST_ABSPATH_TO_SIZE_IN_BYTES[sst_abspath] = sst_file_size
 
 def update_bytes_compacted_metric(dir_abs_path, sst_abspath):
     if not os.path.exists(sst_abspath):
-        incrementAbsPathGaugeValue("rocksdb:sst_file_bytes_compacted", dir_abs_path, SST_ABSPATH_TO_SIZE_IN_BYTES[sst_abspath])
+        incrementAbsPathGaugeValue("rocksdb_sst_file_bytes_compacted", dir_abs_path, SST_ABSPATH_TO_SIZE_IN_BYTES[sst_abspath])
         del SST_ABSPATH_TO_SIZE_IN_BYTES[sst_abspath]
 
 def update_rocksdb_metrics(dir_paths):
@@ -160,6 +160,14 @@ def main():
     start_ttl_watchdog_thread()
 
     paths = list(itertools.chain(*[ glob.glob(path_pattern) for path_pattern in args.paths ]))
+
+    print("Starting application")
+    print("--------")
+    print("Interval:",args.interval)
+    print("Port:",args.port)
+    print("TTL:",args.ttl)
+    print("Path:",args.paths)
+    print("--------")
 
     while True:
         update_rocksdb_metrics(args.paths)
