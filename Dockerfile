@@ -15,8 +15,7 @@ ENV INTERVAL 15
 ENV TTL 60
 ENV PATHS /stores/
 
-CMD /usr/local/bin/python -u /usr/local/bin/rocksdb-prometheus-exporter \
-    --port $PORT \
-    --interval $INTERVAL \
-    --ttl $TTL \
-    $PATHS
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
