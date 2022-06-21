@@ -1,4 +1,4 @@
-FROM python:3.9.12-alpine3.14
+FROM python:3.9.13-alpine3.16
 
 MAINTAINER nicolas@movio.co
 
